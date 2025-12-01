@@ -1,5 +1,5 @@
 # Staging Environment Configuration
-catalog: mcp-dabs-test
+catalog: mcp_dabs_test
 schema: titanic_mlops_staging
 experiment_name: /Shared/titanic-mlops-staging
 model_name: titanic_survival_model

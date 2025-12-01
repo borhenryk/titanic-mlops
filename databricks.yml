@@ -7,7 +7,7 @@ bundle:
 variables:
   catalog:
     description: "Unity Catalog name"
-    default: "mcp-dabs-test"
+    default: "mcp_dabs_test"
   schema:
     description: "Schema name for Titanic MLOps"
     default: "titanic_mlops"
@@ -31,21 +31,21 @@ targets:
     workspace:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: mcp-dabs-test
+      catalog: mcp_dabs_test
       schema: titanic_mlops_dev
 
   staging:
     workspace:
       root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: mcp-dabs-test
+      catalog: mcp_dabs_test
       schema: titanic_mlops_staging
 
   prod:
     workspace:
       root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: mcp-dabs-test
+      catalog: mcp_dabs_test
       schema: titanic_mlops_prod
     run_as:
       service_principal_name: "titanic-mlops-sp"

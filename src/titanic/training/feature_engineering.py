@@ -12,7 +12,7 @@ import os
 try:
     catalog = dbutils.widgets.get("catalog")
 except:
-    catalog = "mcp-dabs-test"
+    catalog = "mcp_dabs_test"
 
 try:
     schema = dbutils.widgets.get("schema")

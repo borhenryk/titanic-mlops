@@ -13,7 +13,7 @@ from mlflow.tracking import MlflowClient
 try:
     catalog = dbutils.widgets.get("catalog")
 except:
-    catalog = "mcp-dabs-test"
+    catalog = "mcp_dabs_test"
 
 try:
     schema = dbutils.widgets.get("schema")

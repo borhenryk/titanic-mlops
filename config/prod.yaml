@@ -1,5 +1,5 @@
 # Production Environment Configuration
-catalog: mcp-dabs-test
+catalog: mcp_dabs_test
 schema: titanic_mlops_prod
 experiment_name: /Shared/titanic-mlops-prod
 model_name: titanic_survival_model

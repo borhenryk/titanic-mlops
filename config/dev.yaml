@@ -1,5 +1,5 @@
 # Development Environment Configuration
-catalog: mcp-dabs-test
+catalog: mcp_dabs_test
 schema: titanic_mlops_dev
 experiment_name: /Shared/titanic-mlops-dev
 model_name: titanic_survival_model
