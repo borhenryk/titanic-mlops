@@ -1,0 +1,58 @@
+resources:
+  jobs:
+    titanic_training_job:
+      name: "titanic-training-${bundle.target}"
+      description: "Titanic survival model training with hyperparameter optimization"
+      
+      tasks:
+        - task_key: "feature_engineering"
+          description: "Prepare features for training"
+          notebook_task:
+            notebook_path: "../src/titanic/training/feature_engineering.py"
+            base_parameters:
+              catalog: "${var.catalog}"
+              schema: "${var.schema}"
+          new_cluster:
+            spark_version: "14.3.x-cpu-ml-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 1
+          
+        - task_key: "train_model"
+          description: "Train model with hyperparameter tuning"
+          depends_on:
+            - task_key: "feature_engineering"
+          notebook_task:
+            notebook_path: "../src/titanic/training/train.py"
+            base_parameters:
+              catalog: "${var.catalog}"
+              schema: "${var.schema}"
+              experiment_name: "${var.experiment_name}"
+              model_name: "${var.model_name}"
+          new_cluster:
+            spark_version: "14.3.x-cpu-ml-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 1
+
+        - task_key: "validate_model"
+          description: "Validate model performance"
+          depends_on:
+            - task_key: "train_model"
+          notebook_task:
+            notebook_path: "../src/titanic/validation/validate_model.py"
+            base_parameters:
+              catalog: "${var.catalog}"
+              schema: "${var.schema}"
+              model_name: "${var.model_name}"
+          new_cluster:
+            spark_version: "14.3.x-cpu-ml-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 1
+
+      schedule:
+        quartz_cron_expression: "0 0 9 * * ?"
+        timezone_id: "Europe/Berlin"
+        pause_status: "PAUSED"
+
+      tags:
+        project: "titanic-mlops"
+        environment: "${bundle.target}"

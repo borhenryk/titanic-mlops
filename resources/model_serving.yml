@@ -1,0 +1,20 @@
+resources:
+  model_serving_endpoints:
+    titanic_serving_endpoint:
+      name: "titanic-survival-endpoint-${bundle.target}"
+      config:
+        served_entities:
+          - entity_name: "${var.catalog}.${var.schema}.${var.model_name}"
+            entity_version: "1"
+            workload_size: "Small"
+            scale_to_zero_enabled: true
+        auto_capture_config:
+          catalog_name: "${var.catalog}"
+          schema_name: "${var.schema}"
+          table_name_prefix: "inference_logs"
+          enabled: true
+      tags:
+        - key: "project"
+          value: "titanic-mlops"
+        - key: "environment"
+          value: "${bundle.target}"
