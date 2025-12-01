@@ -1,4 +1,4 @@
 # Workflow trigger file
-# Last triggered: 2025-12-01T10:45:00Z
-# Purpose: Test with new workspace e2-demo-west
+# Last triggered: 2025-12-01T10:55:00Z
+# Purpose: Test with e2-demo-west workspace (attempt 2)
 # Workspace: https://e2-demo-west.cloud.databricks.com
