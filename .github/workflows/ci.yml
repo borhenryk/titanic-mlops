@@ -1,10 +1,18 @@
+# CI/CD Pipeline for Titanic MLOps
+# Validates, tests, and deploys Databricks Asset Bundles
+
 name: Titanic MLOps CI/CD
 
 on:
   push:
-    branches: [main, develop, 'feature/**']
+    branches:
+      - main
+      - develop
+      - 'feature/**'
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
     inputs:
       environment:
@@ -12,54 +20,112 @@ on:
         required: true
         default: 'dev'
         type: choice
-        options: [dev, staging, prod]
+        options:
+          - dev
+          - staging
+          - prod
 
 env:
   DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
   DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
 jobs:
+  # ============================================
+  # Job 1: Validate and Lint
+  # ============================================
   validate:
     name: Validate Bundle
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - run: pip install databricks-cli
-      - run: |
+
+      - name: Install Databricks CLI (new version for Asset Bundles)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          databricks --version
+
+      - name: Configure Databricks CLI
+        run: |
+          mkdir -p ~/.databricks
           cat > ~/.databrickscfg << EOF
           [DEFAULT]
           host = ${{ secrets.DATABRICKS_HOST }}
           token = ${{ secrets.DATABRICKS_TOKEN }}
           EOF
-      - run: databricks bundle validate -t dev
 
+      - name: Validate Bundle (Dev)
+        run: databricks bundle validate -t dev
+
+      - name: Python Lint
+        run: |
+          pip install ruff
+          ruff check src/ --ignore E501 || true
+
+  # ============================================
+  # Job 2: Unit Tests
+  # ============================================
   test:
     name: Run Tests
     runs-on: ubuntu-latest
     needs: validate
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - run: pip install pytest pytest-cov pyyaml
-      - run: pytest tests/ -v --cov=src/ || true
 
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov pyyaml scikit-learn pandas numpy
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v --cov=src/ || true
+
+  # ============================================
+  # Job 3: Deploy to Dev
+  # ============================================
   deploy-dev:
     name: Deploy to Dev
     runs-on: ubuntu-latest
     needs: [validate, test]
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
     environment: dev
     steps:
-      - uses: actions/checkout@v4
-      - run: pip install databricks-cli
-      - run: databricks bundle deploy -t dev
-      - run: databricks bundle run -t dev titanic_training_job
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Configure Databricks CLI
+        run: |
+          mkdir -p ~/.databricks
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+
+      - name: Deploy to Dev
+        run: databricks bundle deploy -t dev
+
+      - name: Run Training Job
+        run: databricks bundle run -t dev titanic_training_job
+
+  # ============================================
+  # Job 4: Deploy to Staging
+  # ============================================
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
@@ -67,10 +133,28 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment: staging
     steps:
-      - uses: actions/checkout@v4
-      - run: pip install databricks-cli
-      - run: databricks bundle deploy -t staging
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Configure Databricks CLI
+        run: |
+          mkdir -p ~/.databricks
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+
+      - name: Deploy to Staging
+        run: databricks bundle deploy -t staging
+
+  # ============================================
+  # Job 5: Deploy to Production
+  # ============================================
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
@@ -78,6 +162,26 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment: prod
     steps:
-      - uses: actions/checkout@v4
-      - run: pip install databricks-cli
-      - run: databricks bundle deploy -t prod
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Configure Databricks CLI
+        run: |
+          mkdir -p ~/.databricks
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+
+      - name: Deploy to Production
+        run: databricks bundle deploy -t prod
+
+      - name: Notify Success
+        run: |
+          echo "🚀 Production deployment successful!"
+          echo "Model serving endpoint: titanic-survival-endpoint-prod"
