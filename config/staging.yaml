@@ -1,4 +1,5 @@
-catalog: dbdemos_henryk
+# Staging Environment Configuration
+catalog: mcp-dabs-test
 schema: titanic_mlops_staging
 experiment_name: /Shared/titanic-mlops-staging
 model_name: titanic_survival_model
