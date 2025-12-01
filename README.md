@@ -53,3 +53,8 @@ titanic-mlops/
 - **MLflow Experiment:** https://e2-demo-field-eng.cloud.databricks.com/ml/experiments/567797472287066
 - **Model Registry:** dbdemos_henryk.titanic_mlops.titanic_survival_model
 - **Serving Endpoint:** titanic-survival-endpoint-dev
+- **CI/CD Workflows:** https://github.com/borhenryk/titanic-mlops/actions
+
+## 📄 License
+
+MIT License
