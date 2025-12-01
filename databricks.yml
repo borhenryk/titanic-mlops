@@ -19,7 +19,7 @@ variables:
     default: "titanic_survival_model"
 
 workspace:
-  host: https://e2-demo-field-eng.cloud.databricks.com
+  host: https://e2-demo-west.cloud.databricks.com
 
 include:
   - resources/*.yml
