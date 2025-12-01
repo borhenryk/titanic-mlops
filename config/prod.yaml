@@ -1,4 +1,5 @@
-catalog: dbdemos_henryk
+# Production Environment Configuration
+catalog: mcp-dabs-test
 schema: titanic_mlops_prod
 experiment_name: /Shared/titanic-mlops-prod
 model_name: titanic_survival_model
@@ -6,8 +7,8 @@ endpoint_name: titanic-survival-endpoint-prod
 test_size: 0.2
 random_state: 42
 hyperopt_max_evals: 30
-min_accuracy: 0.78
-min_precision: 0.72
-min_recall: 0.68
-min_f1_score: 0.73
-min_roc_auc: 0.82
+min_accuracy: 0.80
+min_precision: 0.75
+min_recall: 0.70
+min_f1_score: 0.75
+min_roc_auc: 0.85
