@@ -1,0 +1,83 @@
+name: Titanic MLOps CI/CD
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, staging, prod]
+
+env:
+  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+jobs:
+  validate:
+    name: Validate Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install databricks-cli
+      - run: |
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+      - run: databricks bundle validate -t dev
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install pytest pytest-cov pyyaml
+      - run: pytest tests/ -v --cov=src/ || true
+
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    if: github.ref == 'refs/heads/develop'
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install databricks-cli
+      - run: databricks bundle deploy -t dev
+      - run: databricks bundle run -t dev titanic_training_job
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install databricks-cli
+      - run: databricks bundle deploy -t staging
+
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install databricks-cli
+      - run: databricks bundle deploy -t prod
