@@ -47,5 +47,3 @@ targets:
     variables:
       catalog: mcp_dabs_test
       schema: titanic_mlops_prod
-    run_as:
-      service_principal_name: "titanic-mlops-sp"
