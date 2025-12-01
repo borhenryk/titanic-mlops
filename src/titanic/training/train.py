@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %pip install hyperopt
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC # Titanic Survival Model Training
 # MAGIC Training pipeline with hyperparameter optimization using MLflow and Hyperopt
