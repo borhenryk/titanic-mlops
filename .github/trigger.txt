@@ -1,4 +1,4 @@
 # Workflow trigger file
-# Last triggered: 2025-12-01T10:20:00Z
-# Purpose: Re-run CI/CD after adding 52.173.0.0/16 to IP whitelist
-# Attempt: 2
+# Last triggered: 2025-12-01T10:45:00Z
+# Purpose: Test with new workspace e2-demo-west
+# Workspace: https://e2-demo-west.cloud.databricks.com
